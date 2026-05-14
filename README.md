@@ -6,7 +6,7 @@
 
 **Enterprise Application Packaging & Deployment Automation**
 
-[![Version](https://img.shields.io/badge/version-1.0.0-6366F1?style=flat-square)](https://github.com/mazhaistudios/DeployFusion/releases)
+[![Version](https://img.shields.io/badge/version-2.3.1-6366F1?style=flat-square)](https://github.com/mazhaistudios/DeployFusion/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows-blue?style=flat-square)](https://github.com/mazhaistudios/DeployFusion)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square)](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
@@ -40,12 +40,15 @@ Tasks that previously required 30–60 minutes of manual console work (creating 
 | 🔒 **Encrypted Secrets** | Client secrets are encrypted using Machine-Level DPAPI — safe for shared admin servers |
 | 📝 **Audit Logging** | Every operation is logged to a local SQLite database with operator name, machine, and status |
 | 🖱 **Drag & Drop** | Drop an installer file directly onto the window to load it |
+| 📋 **Bulk Application Packaging** | Import a CSV and package 10, 50, or 100+ apps in a single batch run *(New in v2.3.1)* |
+| 🔄 **Migration Assistant** | Scan and re-deploy legacy SCCM apps with modern PSADT v4 wrappers *(New in v2.3.1)* |
+| 🔗 **Supersedence Manager** | Define and apply supersedence chains between application versions in SCCM *(New in v2.3.1)* |
 
 ---
 
 ## 📸 Screenshots
 
-> *Screenshots of the Package App, Manage Apps, Dashboard, and Settings screens.*
+> *Screenshots of the Package App, Manage Apps, Dashboard, Bulk Import, and Settings screens.*
 
 *(Coming soon — see the [wiki](https://github.com/mazhaistudios/DeployFusion/wiki) for a full walkthrough.)*
 
@@ -79,7 +82,7 @@ Before installing or building DeployFusion, ensure the following are in place:
 
 ### Option 1: Install from MSI (Recommended)
 
-1. Download the latest `MazhaiDeployFusion-1.0.0.msi` from the [Releases](https://github.com/mazhaistudios/DeployFusion/releases) page.
+1. Download the latest `MazhaiDeployFusion-2.3.1.msi` from the [Releases](https://github.com/mazhaistudios/DeployFusion/releases) page.
 2. Run the installer. It will install to `C:\Program Files\Mazhai DeployFusion\` by default.
 3. Launch **Mazhai DeployFusion** from the Start Menu.
 
@@ -230,6 +233,56 @@ Step 7 ── Assign groups to the Intune app
 
 ---
 
+## 📋 Bulk Application Packaging *(New in v2.3.1)*
+
+The Bulk Import panel lets you package dozens of applications in a single unattended batch run.
+
+1. Click **📋 Bulk Import** in the left navigation bar.
+2. Click **Browse CSV** and select a CSV file with one app per row.
+
+**CSV format:**
+
+```csv
+AppName,InstallerPath,Arguments,Publisher,Version
+7-Zip 23.01,\\server\sources\7z2301-x64.msi,/qn,Igor Pavlov,23.01
+Google Chrome 120,\\server\sources\ChromeSetup.exe,/silent /install,Google,120.0
+```
+
+3. Review the imported list. Use **✕ Remove Selected** to exclude individual rows, or **🗑 Clear All** to start over.
+4. Click **🚀 Run Batch** to begin. Each application is packaged and deployed sequentially with full PSADT wrapper generation and SCCM deployment.
+
+---
+
+## 🔄 Migration Assistant *(New in v2.3.1)*
+
+The Migration Assistant scans your existing SCCM environment and re-deploys legacy applications using modern DeployFusion standards.
+
+1. Click **🔄 Migration** in the left navigation bar.
+2. Click **Scan SCCM Apps** to load your existing SCCM application catalog.
+3. Select the applications you want to migrate.
+4. Click **Migrate Selected** — DeployFusion will:
+   - Generate a fresh PSADT v4 wrapper for each selected app
+   - Apply the standardized dual-registry detection method
+   - Create new collections and deployments under the DeployFusion naming convention
+
+> **Note:** The original SCCM application is left untouched. Migration creates new applications alongside the originals.
+
+---
+
+## 🔗 Supersedence Manager *(New in v2.3.1)*
+
+The Supersedence Manager lets you define upgrade relationships between application versions without using the SCCM console.
+
+1. Click **🔗 Supersedence** in the left navigation bar.
+2. Select a **Superseded** (old) application from the list.
+3. Select the **Superseding** (new) application.
+4. Choose the supersedence behavior:
+   - **Upgrade** — install the new version alongside (or replacing) the old
+   - **Uninstall** — uninstall the old version before installing the new one
+5. Click **Apply Supersedence**. The relationship is written directly to SCCM via the SDK.
+
+---
+
 ## 🗂 Managing Applications
 
 Click **Manage Apps** to browse all SCCM applications.
@@ -275,7 +328,8 @@ The data grid shows per-collection compliance percentages with an inline progres
 | PSADT Packaging | PSAppDeployToolkit v4 (embedded as `PSADT.zip`) |
 | Intune Packaging | IntuneWinAppUtil.exe (auto-downloaded from Microsoft) |
 | Icon Fetching | `IconFetcher.cs` — multi-source web fetching |
-| Settings | JSON file at `%ProgramData%\MazhaiCloud\SCCMAutomationTool\appsettings_v2.json` |
+| Settings | JSON file at `%AppData%\MazhaiCloud\DeployFusion\appsettings_v2.json` |
+| MSI Installer | WiX v5 |
 
 ### PSADT Wrapper Generation
 
@@ -303,7 +357,7 @@ This is consistent across both SCCM and Intune deployments.
 
 Settings are stored at:
 ```
-%ProgramData%\MazhaiCloud\SCCMAutomationTool\appsettings_v2.json
+%AppData%\MazhaiCloud\DeployFusion\appsettings_v2.json
 ```
 
 ```json
@@ -326,9 +380,9 @@ Settings are stored at:
 
 ### Audit Log
 
-Every deployment, deletion, and rename is persisted to a SQLite database:
+Every deployment, deletion, rename, migration, and supersedence operation is persisted to a SQLite database:
 ```
-%ProgramData%\MazhaiCloud\DeployFusion\Logs\{MachineName}\AuditLog.db
+%AppData%\MazhaiCloud\DeployFusion\Logs\AuditLog.db
 ```
 
 The database schema:
@@ -337,14 +391,15 @@ The database schema:
 |---|---|---|
 | `Id` | INTEGER | Auto-incremented primary key |
 | `Timestamp` | TEXT | UTC timestamp (ISO 8601) |
-| `OperationType` | TEXT | `DEPLOY`, `DELETE`, `RENAME`, `RETIRE`, etc. |
+| `OperationType` | TEXT | `DEPLOY`, `DELETE`, `RENAME`, `RETIRE`, `MIGRATE`, `SUPERSEDE`, etc. |
 | `AppName` | TEXT | Application name |
 | `Operator` | TEXT | Windows username |
 | `Machine` | TEXT | Machine hostname |
-| `Status` | TEXT | `SUCCESS`, `FAILED`, `PENDING` |
+| `Environment` | TEXT | Active environment profile (DEV / UAT / PROD) |
+| `Status` | TEXT | `SUCCESS`, `FAILED`, `PENDING`, `APPROVED`, `REJECTED` |
 | `Details` | TEXT | Error message or success summary |
 
-Entries older than **30 days** are automatically purged on startup (PENDING entries are preserved).
+Entries older than **365 days** are automatically purged on startup (PENDING entries are preserved indefinitely).
 
 ---
 
@@ -369,21 +424,32 @@ Contributions are welcome! Please follow these steps:
 
 ```
 SCCMAutomationTool/
-├── MainWindow.xaml          # Main UI — all panels (Package, Manage, Dashboard, Settings, About)
-├── MainWindow.xaml.cs       # UI code-behind and event handlers
-├── SCCMAutomation.cs        # All SCCM operations (WMI/SDK — build, manage, delete, rename)
-├── IntuneAutomation.cs      # Intune pipeline (package, upload, assign via MS Graph)
-├── PSADTBuilder.cs          # PSADT v4 wrapper generation
-├── ConfigManager.cs         # Settings load/save/encrypt
-├── AuditDatabase.cs         # SQLite audit log
-├── IconFetcher.cs           # Web-based icon retrieval
-├── App.xaml                 # WPF application entry point and global resource dictionaries
-├── App.xaml.cs              # App startup logic
-├── PSADT.zip                # Embedded PSADT v4 template
-├── logo.png                 # Application logo
-├── App.ico                  # Application icon
+├── MainWindow.xaml              # Main UI — all panels
+├── MainWindow.xaml.cs           # UI code-behind and event handlers
+├── MainWindow.BulkImport.cs     # Bulk packaging panel logic
+├── MainWindow.Migration.cs      # Migration assistant panel logic
+├── MainWindow.Supersedence.cs   # Supersedence manager panel logic
+├── SCCMAutomation.cs            # All SCCM operations (WMI/SDK)
+├── IntuneAutomation.cs          # Intune pipeline (package, upload, assign)
+├── PSADTBuilder.cs              # PSADT v4 wrapper generation
+├── BulkPackagingManager.cs      # Batch packaging orchestration
+├── MigrationAssistant.cs        # Legacy app migration logic
+├── SupersedenceManager.cs       # Supersedence chain management
+├── ConfigManager.cs             # Settings load/save/encrypt
+├── AuditDatabase.cs             # SQLite audit log
+├── IconFetcher.cs               # Web-based icon retrieval
+├── App.xaml                     # WPF application entry point
+├── App.xaml.cs                  # App startup and global exception handling
+├── PSADT.zip                    # Embedded PSADT v4 template
+├── logo.png                     # Application logo
+├── App.ico                      # Application icon (32-bit ARGB, multi-size)
+├── LandingPage/                 # Product landing page source
+│   ├── index.html
+│   ├── style.css
+│   ├── app.js
+│   └── logo.png
 └── Setup/
-    └── Product.wxs          # WiX v4 MSI installer definition
+    └── Product.wxs              # WiX v5 MSI installer definition
 ```
 
 ---
@@ -456,5 +522,3 @@ Personal — [https://navaneethmalaiyappan.com](https://navaneethmalaiyappan.com
 ⭐ **Star this repo** if DeployFusion saves you time!
 
 </div>
-
-
