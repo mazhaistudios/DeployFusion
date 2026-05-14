@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="logo.png" alt="Mazhai DeployFusion" width="120"/>
-
 # Mazhai DeployFusion
 
 **Enterprise Application Packaging & Deployment Automation**
