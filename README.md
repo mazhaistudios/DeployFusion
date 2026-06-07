@@ -1,10 +1,12 @@
 <div align="center">
 
+<img src="logo.png" alt="Mazhai DeployFusion" width="120"/>
+
 # Mazhai DeployFusion
 
 **Enterprise Application Packaging & Deployment Automation**
 
-[![Version](https://img.shields.io/badge/version-2.3.1-6366F1?style=flat-square)](https://github.com/mazhaistudios/DeployFusion/releases)
+[![Version](https://img.shields.io/badge/version-3.0.1-6366F1?style=flat-square)](https://github.com/mazhaistudios/DeployFusion/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows-blue?style=flat-square)](https://github.com/mazhaistudios/DeployFusion)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square)](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
@@ -23,6 +25,39 @@ Tasks that previously required 30–60 minutes of manual console work (creating 
 
 ---
 
+## 🎉 What's New in v3.0.1
+
+### Highlights
+
+- **Full-screen startup** — Application now launches maximized by default for an improved first-run experience.
+- **Enhanced UI/UX** — Streamlined navigation, cleaner sidebar, and improved visual consistency across all panels.
+- **Enterprise Deployment mode** — Centralized deployment management for large-scale organizational rollouts with SQL Server-backed audit and approval workflows.
+- **Standalone Deployment mode** — Lightweight option for individual systems and small teams requiring no centralized infrastructure.
+- **Silent installation support** — Full unattended MSI installation for SCCM, Intune, and automated provisioning workflows.
+- **Stability improvements** — Multiple crash fixes and improved error handling across all deployment operations.
+- **Improved settings persistence** — Graceful handling of permission-restricted environments; settings remain active for the session even when disk write is unavailable.
+- **Streamlined approval workflow** — Single-application operations execute immediately; approval gates apply only to bulk operations (2+ apps).
+
+### Release Notes
+
+| Type | Description |
+|---|---|
+| ✨ New | Enterprise Deployment mode with centralized SQL Server audit and approval |
+| ✨ New | Standalone Deployment mode for lightweight, no-infrastructure environments |
+| ✨ New | Silent/unattended MSI installation via msiexec command line |
+| ✨ New | Application opens maximized by default |
+| ✨ New | Approval workflow threshold — single-app operations bypass approval gate |
+| 🛠 Improved | UI/UX consistency across all navigation panels |
+| 🛠 Improved | Error handling and crash resilience |
+| 🛠 Improved | Settings persistence with graceful degradation on permission errors |
+| 🛠 Improved | ProgramData directory permissions set at install time by MSI |
+| 🐛 Fixed | Role enforcement now correctly blocks unauthorized delete and deploy actions |
+| 🐛 Fixed | Bulk delete approval bypass for 1–2 applications |
+| 🐛 Fixed | UnauthorizedAccessException crash on profile selection change |
+| 🐛 Fixed | Window startup size (now opens maximized instead of 960×1260 windowed) |
+
+---
+
 ## ✨ Features at a Glance
 
 | Feature | Description |
@@ -38,9 +73,13 @@ Tasks that previously required 30–60 minutes of manual console work (creating 
 | 🔒 **Encrypted Secrets** | Client secrets are encrypted using Machine-Level DPAPI — safe for shared admin servers |
 | 📝 **Audit Logging** | Every operation is logged to a local SQLite database with operator name, machine, and status |
 | 🖱 **Drag & Drop** | Drop an installer file directly onto the window to load it |
-| 📋 **Bulk Application Packaging** | Import a CSV and package 10, 50, or 100+ apps in a single batch run *(New in v2.3.1)* |
-| 🔄 **Migration Assistant** | Scan and re-deploy legacy SCCM apps with modern PSADT v4 wrappers *(New in v2.3.1)* |
-| 🔗 **Supersedence Manager** | Define and apply supersedence chains between application versions in SCCM *(New in v2.3.1)* |
+| 📋 **Bulk Application Packaging** | Import a CSV and package 10, 50, or 100+ apps in a single batch run |
+| 🔍 **WinGet Integration** | Search the 90,000+ package WinGet catalog inline — auto-fills metadata and downloads installers automatically |
+| 🔄 **Migration Assistant** | Scan and re-deploy legacy SCCM apps with modern PSADT v4 wrappers |
+| 🔗 **Supersedence Manager** | Define and apply supersedence chains between application versions in SCCM |
+| 🔔 **Teams Notifications** | Real-time alerts to Microsoft Teams for deployments, approvals, version updates, and ring promotions |
+| 🏢 **Enterprise Mode** | Centralized approval workflows, SQL Server audit, and multi-admin coordination *(New in v3.0.1)* |
+| 🖥 **Standalone Mode** | Lightweight single-machine mode with no centralized infrastructure required *(New in v3.0.1)* |
 
 ---
 
@@ -49,6 +88,85 @@ Tasks that previously required 30–60 minutes of manual console work (creating 
 > *Screenshots of the Package App, Manage Apps, Dashboard, Bulk Import, and Settings screens.*
 
 *(Coming soon — see the [wiki](https://github.com/mazhaistudios/DeployFusion/wiki) for a full walkthrough.)*
+
+---
+
+## 🚀 Deployment Options
+
+### 🏢 Enterprise Deployment
+
+Designed for large-scale organizational rollouts managed centrally by IT teams.
+
+**Features:**
+- Centralized deployment management via SQL Server audit database
+- Multi-admin coordination with approval workflows
+- Role-based access control (Admin / Operator / Read Only)
+- Enterprise-wide software distribution tracking
+- Approval gates for bulk operations (2+ applications)
+- Global settings sync — all admin workstations share configuration
+
+**SCCM / Intune silent install:**
+```powershell
+# Standard enterprise install
+msiexec /i MazhaiDeployFusion.msi /qn /l*v "%TEMP%\DeployFusion.log" `
+         ENTERPRISE=1 SQLSERVER=MCSCCM01 SQLDB=Mazhai_DeployFusion
+
+# With Intune Win32 (intunewin wrapping)
+msiexec /i MazhaiDeployFusion.msi /qn ENTERPRISE=1 SQLSERVER=%SQLSERVER% SQLDB=Mazhai_DeployFusion
+```
+
+**Registry detection (Intune):**
+```
+HKLM\SOFTWARE\MazhaiCloud\DeployFusion  →  EnterpriseMode = "1"
+```
+
+### 🖥 Standalone Deployment
+
+Lightweight deployment for individual systems, small teams, and environments without centralized infrastructure.
+
+**Features:**
+- Simple installation and configuration — no SQL Server required
+- Single-user or small-team model with local audit log (SQLite)
+- Ideal for independent administrators and lab environments
+- Full SCCM and Intune packaging capability without enterprise overhead
+
+**Standard silent install:**
+```powershell
+msiexec /i MazhaiDeployFusion.msi /qn /l*v "%TEMP%\DeployFusion.log"
+```
+
+**File detection (SCCM):**
+```
+%ProgramFiles%\Mazhai DeployFusion\DeployFusion.exe
+```
+
+### 🤫 Silent Installation Support
+
+DeployFusion v3.0.1 supports fully unattended installations for automated deployment scenarios.
+
+**MSI public properties:**
+
+| Property | Default | Description |
+|---|---|---|
+| `ENTERPRISE` | `0` | Set to `1` to enable Enterprise mode at install time |
+| `SQLSERVER` | *(empty)* | Pre-configure the SQL Server hostname |
+| `SQLDB` | `Mazhai_DeployFusion` | Pre-configure the audit database name |
+
+**Example use cases:**
+
+```powershell
+# SCCM Application — Install command
+msiexec /i MazhaiDeployFusion.msi /qn /l*v "%TEMP%\DF.log" ENTERPRISE=1 SQLSERVER=MCSCCM01
+
+# SCCM Application — Uninstall command
+msiexec /x {16802928-854D-4522-8395-8E3926955743} /qn
+
+# Intune Win32 — Install command (wrap with IntuneWinAppUtil first)
+msiexec /i MazhaiDeployFusion.msi /qn ENTERPRISE=1 SQLSERVER=%SQLSERVER% SQLDB=Mazhai_DeployFusion
+
+# Automated provisioning / remote deployment
+msiexec /i \\server\share\MazhaiDeployFusion.msi /qn /l*v "%TEMP%\DF.log"
+```
 
 ---
 
@@ -66,6 +184,14 @@ Before installing or building DeployFusion, ensure the following are in place:
 | **Network access to SCCM Site Server** | TCP port 135 (RPC) must be open |
 | **SCCM Administrator rights** | The account running the tool needs Full Administrator role in SCCM |
 
+### For Enterprise mode (optional)
+
+| Requirement | Details |
+|---|---|
+| **SQL Server** | Any edition — Express, Standard, or Enterprise |
+| **SQL Database** | Created automatically on first launch; default name `Mazhai_DeployFusion` |
+| **SQL permissions** | The running account needs `db_owner` on the audit database |
+
 ### For Intune publishing (optional)
 
 | Requirement | Details |
@@ -80,9 +206,11 @@ Before installing or building DeployFusion, ensure the following are in place:
 
 ### Option 1: Install from MSI (Recommended)
 
-1. Download the latest `MazhaiDeployFusion-2.3.1.msi` from the [Releases](https://github.com/mazhaistudios/DeployFusion/releases) page.
+1. Download the latest `MazhaiDeployFusion-3.0.1.msi` from the [Releases](https://github.com/mazhaistudios/DeployFusion/releases) page.
 2. Run the installer. It will install to `C:\Program Files\Mazhai DeployFusion\` by default.
 3. Launch **Mazhai DeployFusion** from the Start Menu.
+
+> **Enterprise rollout:** Use the silent install command above with `ENTERPRISE=1` and `SQLSERVER` properties to pre-configure every workstation from SCCM or Intune.
 
 ### Option 2: Build from Source
 
@@ -92,16 +220,28 @@ git clone https://github.com/mazhaistudios/DeployFusion.git
 cd deployfusion
 
 # 2. Restore NuGet packages
-dotnet restore SCCMAutomationTool.csproj
+dotnet restore DeployFusion.csproj
 
 # 3. Build (auto-detects SCCM Admin Console path)
-dotnet build SCCMAutomationTool.csproj --configuration Release
+dotnet build DeployFusion.csproj --configuration Release
 
 # 4. Run
-.\bin\Release\net8.0-windows\SCCMAutomationTool.exe
+.\bin\Release\net8.0-windows\DeployFusion.exe
 ```
 
 > **Note:** Building requires the SCCM Admin Console to be installed on the build machine, as the SCCM SDK DLLs are referenced from the console's `bin` folder.
+
+### Option 3: Build the MSI Installer
+
+```powershell
+# Requires .NET 8 SDK
+.\Build-Msi.ps1
+
+# With code signing
+.\Build-Msi.ps1 -SignCertThumbprint "YOUR_CERT_THUMBPRINT"
+
+# Output: dist\MazhaiDeployFusion.msi
+```
 
 ---
 
@@ -122,7 +262,14 @@ dotnet build SCCMAutomationTool.csproj --configuration Release
 3. Click **🔌 Test Connection** to verify connectivity.
 4. Click **💾 Save Settings**. The tool validates the SCCM connection before saving.
 
-### 2. Configure Intune (Optional)
+### 2. Choose Your Deployment Mode
+
+On first launch, the **First-Run Wizard** guides you through selecting your deployment mode:
+
+- **Enterprise** — connects to a SQL Server for centralized audit logging and multi-admin approval workflows
+- **Standalone** — uses a local SQLite database; no server infrastructure required
+
+### 3. Configure Intune (Optional)
 
 If you plan to publish applications to Intune:
 
@@ -231,7 +378,7 @@ Step 7 ── Assign groups to the Intune app
 
 ---
 
-## 📋 Bulk Application Packaging *(New in v2.3.1)*
+## 📋 Bulk Application Packaging
 
 The Bulk Import panel lets you package dozens of applications in a single unattended batch run.
 
@@ -247,11 +394,61 @@ Google Chrome 120,\\server\sources\ChromeSetup.exe,/silent /install,Google,120.0
 ```
 
 3. Review the imported list. Use **✕ Remove Selected** to exclude individual rows, or **🗑 Clear All** to start over.
-4. Click **🚀 Run Batch** to begin. Each application is packaged and deployed sequentially with full PSADT wrapper generation and SCCM deployment.
+4. Click **🚀 Run Batch** to begin. Each application is packaged and deployed sequentially.
+
+> **Approval note:** Batches of 2 or more applications in Enterprise mode with approval enabled will be queued for approval before execution.
 
 ---
 
-## 🔄 Migration Assistant *(New in v2.3.1)*
+## 🔍 WinGet Integration
+
+DeployFusion integrates with the Windows Package Manager (WinGet) catalog across four panels, letting you search, package, and monitor apps without ever manually downloading an installer.
+
+### Package App — Inline Catalog Search
+
+A **Winget Lookup** bar sits at the top of the Package App panel. Type any application name and DeployFusion queries the WinGet catalog in real time:
+
+- Results show the **Package ID**, latest version, and publisher
+- Selecting a result auto-fills the app name, publisher, version, and silent install/uninstall arguments from the package manifest
+- When you drop a local installer file onto the window, DeployFusion automatically triggers a WinGet search using the detected app name
+
+### Bulk Import — No Local Installer Required
+
+Click **🔍 Add from WinGet** in the Bulk Import panel to search the catalog and add packages directly to the batch queue. Entries added this way are marked as **WinGet-only**:
+
+- No local `.exe` or `.msi` file needed
+- DeployFusion downloads the installer automatically at build time using `winget download`
+- Install arguments are resolved from the WinGet manifest (with a fallback to the built-in known-switches database for popular apps)
+- The batch grid shows a `✅ Package.ID` badge on matched rows and `⚪ Not matched` on unmatched ones
+
+**Mixed batches are fully supported** — some rows can use local files, others can be WinGet-only.
+
+### Manage Apps — Version Monitoring
+
+Assign a **WinGet Package ID** to any deployed SCCM application from the details sidebar:
+
+```
+Manage Apps → Select an app → "Winget Package ID" field → Save
+```
+
+Once mapped, DeployFusion checks the WinGet catalog for newer versions:
+
+- **On-demand:** Click **Check Winget Versions** in the Manage Apps toolbar
+- **Scheduled:** Enable _Winget version monitoring_ in Settings with a configurable interval (days). Checks run automatically in the background and send a Teams alert when an update is found
+
+WinGet mappings are persisted in the audit database so they survive app restarts.
+
+### Supersedence Manager — Fetch via WinGet
+
+When defining a supersedence relationship, use **⬇ Fetch via WinGet** to:
+1. Download the latest installer for the superseding application
+2. Auto-populate all fields (app name, publisher, version, install arguments)
+
+This means you can set up a full version upgrade supersedence chain without manually sourcing the new installer.
+
+---
+
+## 🔄 Migration Assistant
 
 The Migration Assistant scans your existing SCCM environment and re-deploys legacy applications using modern DeployFusion standards.
 
@@ -267,7 +464,7 @@ The Migration Assistant scans your existing SCCM environment and re-deploys lega
 
 ---
 
-## 🔗 Supersedence Manager *(New in v2.3.1)*
+## 🔗 Supersedence Manager
 
 The Supersedence Manager lets you define upgrade relationships between application versions without using the SCCM console.
 
@@ -296,6 +493,67 @@ Click **Manage Apps** to browse all SCCM applications.
 | **Redistribute** | Re-trigger content distribution to all DPs |
 | **🗑 Delete** | Removes deployments, content from DPs, collections, the SCCM application, and the source folder |
 
+> **Approval note (Enterprise mode):** Deleting 2 or more applications simultaneously is queued for approval. Single-application deletions execute immediately.
+
+---
+
+## 🔔 Teams Notifications
+
+DeployFusion posts real-time cards to Microsoft Teams (or any compatible incoming webhook endpoint) so your team stays informed without checking the app.
+
+### Setup
+
+In **Settings → Notifications**, configure one or more webhook URLs:
+
+| Setting | Event |
+|---|---|
+| **General webhook** (`NotificationWebhookUrl`) | Catch-all — fires for all event types if specific URLs are not set |
+| **Deployments** (`WebhookUrlDeployments`) | SCCM / Intune deployment results and ring promotions |
+| **Version Alerts** (`WebhookUrlVersionAlerts`) | WinGet version update detected for a deployed app |
+| **Approvals** (`WebhookUrlApprovals`) | Approval requests and rejection results (Enterprise mode) |
+
+Specific URLs take precedence over the general webhook. You can route each event type to a different Teams channel.
+
+### Notification Types
+
+#### ✔ Deployment Results
+Posted after every SCCM or Intune packaging operation — success or failure. Includes app name, target system (SCCM / Intune), operator, environment profile, and error detail on failure.
+
+#### 🔔 Approval Requests
+When a bulk operation (2+ apps) is queued for approval in Enterprise mode, a card is posted immediately so approvers can act without opening DeployFusion.
+
+#### ✕ Rejection Notifications
+If an approver rejects a queued operation, a rejection card is posted with the app name, operation type, and the name of the rejecting admin.
+
+#### ⬆ Version Update Alerts
+Triggered when WinGet reports a newer version of a deployed application (via scheduled monitoring or on-demand check). Includes the app name, currently deployed version, and the latest available version.
+
+#### 💫 Ring Promotions
+Posted when an application is promoted from one deployment ring to the next (e.g., Pilot → UAT → Production), giving the whole team visibility into rollout progress.
+
+### Example Webhook Payload (Teams Adaptive Card)
+
+```json
+{
+  "type": "message",
+  "attachments": [{
+    "contentType": "application/vnd.microsoft.card.adaptive",
+    "content": {
+      "type": "AdaptiveCard",
+      "body": [
+        { "type": "TextBlock", "text": "✔ Deployment Successful", "weight": "Bolder" },
+        { "type": "FactSet", "facts": [
+          { "title": "Application", "value": "Google Chrome 125.0" },
+          { "title": "Target",      "value": "SCCM" },
+          { "title": "Operator",    "value": "sccmadmin@MCSCCM01" },
+          { "title": "Environment", "value": "PRD_IntuneApp" }
+        ]}
+      ]
+    }
+  }]
+}
+```
+
 ---
 
 ## 📊 Health Dashboard
@@ -322,68 +580,29 @@ The data grid shows per-collection compliance percentages with an inline progres
 | Intune API | Microsoft Graph REST API (`/beta/deviceAppManagement`) |
 | Authentication | MSAL.NET (`Microsoft.Identity.Client`) |
 | Secret Encryption | `System.Security.Cryptography.ProtectedData` (DPAPI, Machine scope) |
-| Audit Logging | SQLite via `Microsoft.Data.Sqlite` |
+| Audit Logging (Standalone) | SQLite via `Microsoft.Data.Sqlite` |
+| Audit Logging (Enterprise) | SQL Server via `Microsoft.Data.SqlClient` |
 | PSADT Packaging | PSAppDeployToolkit v4 (embedded as `PSADT.zip`) |
 | Intune Packaging | IntuneWinAppUtil.exe (auto-downloaded from Microsoft) |
 | Icon Fetching | `IconFetcher.cs` — multi-source web fetching |
-| Settings | JSON file at `%AppData%\MazhaiCloud\DeployFusion\appsettings_v2.json` |
-| MSI Installer | WiX v5 |
-
-### PSADT Wrapper Generation
-
-For every application packaged, the tool generates a complete PSADT v4 deployment package:
-
-- **Extracts** the bundled PSADT v4 template from `PSADT.zip` (embedded resource)
-- **Configures** `Invoke-AppDeployToolkit.ps1` with your app name, vendor, version, install/uninstall commands
-- **Injects** a branding registry block under `HKLM:\SOFTWARE\Mazhai\{identifier}` for detection
-- **Handles** both MSI (`Start-ADTMsiProcess`) and EXE (`Start-ADTProcess`) installers automatically
-- **Writes** the standard post-install confirmation prompt with the app name
-
-### Detection Method
-
-All applications use a standardized dual-registry detection method:
-
-```
-HKEY_LOCAL_MACHINE\SOFTWARE\Mazhai\Mazhai-{AppSlug}-{arch}-En
-  Name     = {Vendor}_{identifier}_ALL_1.0-0001_EN   (String, equals)
-  Revision = 0001                                      (String, equals)
-```
-
-This is consistent across both SCCM and Intune deployments.
+| Settings | JSON file at `%ProgramData%\MazhaiCloud\DeployFusion\appsettings_v2.json` |
+| MSI Installer | WiX v5 SDK |
 
 ### Configuration File
 
 Settings are stored at:
 ```
-%AppData%\MazhaiCloud\DeployFusion\appsettings_v2.json
+C:\ProgramData\MazhaiCloud\DeployFusion\appsettings_v2.json
 ```
 
-```json
-{
-  "Profiles": [
-    {
-      "ProfileName": "PROD",
-      "SccmServer": "SCCM01.contoso.com",
-      "SiteCode": "PS1",
-      "DefaultDestinationPath": "\\\\server\\Sources\\Applications"
-    }
-  ],
-  "ActiveProfileIndex": 0,
-  "IntuneTenantId": "your-tenant-id",
-  "IntuneClientId": "your-client-id",
-  "UseIntuneAppSecret": true,
-  "IntuneClientSecretEncrypted": "<DPAPI encrypted base64>"
-}
-```
+The installer sets `BUILTIN\Users` read/write permissions on this directory so all admin accounts can persist settings without requiring elevation.
 
 ### Audit Log
 
-Every deployment, deletion, rename, migration, and supersedence operation is persisted to a SQLite database:
-```
-%AppData%\MazhaiCloud\DeployFusion\Logs\AuditLog.db
-```
+Every deployment, deletion, rename, migration, and supersedence operation is persisted to the audit database:
 
-The database schema:
+- **Standalone:** `%ProgramData%\MazhaiCloud\DeployFusion\Logs\AuditLog.db` (SQLite)
+- **Enterprise:** SQL Server table in `Mazhai_DeployFusion` database
 
 | Column | Type | Description |
 |---|---|---|
@@ -421,7 +640,7 @@ Contributions are welcome! Please follow these steps:
 ### Project Structure
 
 ```
-SCCMAutomationTool/
+DeployFusion/
 ├── MainWindow.xaml              # Main UI — all panels
 ├── MainWindow.xaml.cs           # UI code-behind and event handlers
 ├── MainWindow.BulkImport.cs     # Bulk packaging panel logic
@@ -434,10 +653,11 @@ SCCMAutomationTool/
 ├── MigrationAssistant.cs        # Legacy app migration logic
 ├── SupersedenceManager.cs       # Supersedence chain management
 ├── ConfigManager.cs             # Settings load/save/encrypt
-├── AuditDatabase.cs             # SQLite audit log
+├── AuditDatabase.cs             # SQLite / SQL Server audit log
 ├── IconFetcher.cs               # Web-based icon retrieval
 ├── App.xaml                     # WPF application entry point
 ├── App.xaml.cs                  # App startup and global exception handling
+├── Directory.Build.props        # Single version source for app + MSI
 ├── PSADT.zip                    # Embedded PSADT v4 template
 ├── logo.png                     # Application logo
 ├── App.ico                      # Application icon (32-bit ARGB, multi-size)
@@ -447,7 +667,10 @@ SCCMAutomationTool/
 │   ├── app.js
 │   └── logo.png
 └── Setup/
-    └── Product.wxs              # WiX v5 MSI installer definition
+    ├── Setup.wixproj            # WiX v5 SDK project
+    ├── Product.wxs              # MSI installer definition
+    ├── Components.wxs           # Auto-harvested publish output
+    └── Generate-Assets.ps1      # Installer bitmap/icon generation
 ```
 
 ---
@@ -478,12 +701,9 @@ The **"Use Unattended App Registration"** checkbox is enabled but no secret was 
 
 Ensure the installer file path does not contain special characters. The file is copied to a temp directory first, so very long paths can also cause issues on Windows.
 
-### Deployment Type fails to add
+### Settings not saved after restart
 
-This uses `Add-CMScriptDeploymentType` via PowerShell, which requires the ConfigurationManager PowerShell module (part of the Admin Console). Ensure PowerShell execution policy allows script execution:
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
-```
+If `C:\ProgramData\MazhaiCloud\DeployFusion` has a restrictive ACL (e.g., created by SYSTEM during a previous install), the app logs a warning but continues operating with in-memory settings. **Re-run the v3.0.1 MSI installer** — it sets `BUILTIN\Users` read/write on the directory, permanently fixing the permissions.
 
 ---
 
