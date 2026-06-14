@@ -6,9 +6,9 @@
 
 **Enterprise Application Packaging & Deployment Automation**
 
-[![Version](https://img.shields.io/badge/version-3.0.1-6366F1?style=flat-square)](https://github.com/mazhaistudios/DeployFusion/releases)
+[![Version](https://img.shields.io/badge/version-4.0.1-6366F1?style=flat-square)](https://github.com/mazhaistudios/DeployFusion/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows-blue?style=flat-square)](https://github.com/mazhaistudios/DeployFusion)
-[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square)](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square)](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
 *Package once. Deploy everywhere. No scripts required.*
@@ -25,36 +25,29 @@ Tasks that previously required 30–60 minutes of manual console work (creating 
 
 ---
 
-## 🎉 What's New in v3.0.1
+## 🎉 What's New in v4.0.1
 
 ### Highlights
 
-- **Full-screen startup** — Application now launches maximized by default for an improved first-run experience.
-- **Enhanced UI/UX** — Streamlined navigation, cleaner sidebar, and improved visual consistency across all panels.
-- **Enterprise Deployment mode** — Centralized deployment management for large-scale organizational rollouts with SQL Server-backed audit and approval workflows.
-- **Standalone Deployment mode** — Lightweight option for individual systems and small teams requiring no centralized infrastructure.
-- **Silent installation support** — Full unattended MSI installation for SCCM, Intune, and automated provisioning workflows.
-- **Stability improvements** — Multiple crash fixes and improved error handling across all deployment operations.
-- **Improved settings persistence** — Graceful handling of permission-restricted environments; settings remain active for the session even when disk write is unavailable.
-- **Streamlined approval workflow** — Single-application operations execute immediately; approval gates apply only to bulk operations (2+ apps).
+- **AI Packaging Assistant** — Suggests the deployment name, description, silent install/uninstall switches, and the silent kill switch, then applies them to the form in one click. Bring your own provider: Anthropic Claude, any OpenAI-compatible endpoint, or a fully offline local **Ollama** model. No vendor key ships with the app.
+- **Silent Kill Switch** — Required (silent) deployments now force-close a running application before installing, so the install no longer fails on locked files. The built-in installer-name process detection can be overridden by the AI-suggested process list when a package needs it.
+- **Desktop shortcut** — The MSI now creates an all-users desktop shortcut at install time (alongside the Start Menu entry) and removes it cleanly on uninstall.
+- **.NET 10 / WiX v5 toolchain** — Application and tests target `net10.0-windows`; the MSI build script derives the publish framework automatically so it tracks future TFM bumps.
+- **Stability & build fixes** — Continued error-handling improvements and installer/packaging corrections.
 
 ### Release Notes
 
 | Type | Description |
 |---|---|
-| ✨ New | Enterprise Deployment mode with centralized SQL Server audit and approval |
-| ✨ New | Standalone Deployment mode for lightweight, no-infrastructure environments |
-| ✨ New | Silent/unattended MSI installation via msiexec command line |
-| ✨ New | Application opens maximized by default |
-| ✨ New | Approval workflow threshold — single-app operations bypass approval gate |
-| 🛠 Improved | UI/UX consistency across all navigation panels |
-| 🛠 Improved | Error handling and crash resilience |
-| 🛠 Improved | Settings persistence with graceful degradation on permission errors |
-| 🛠 Improved | ProgramData directory permissions set at install time by MSI |
-| 🐛 Fixed | Role enforcement now correctly blocks unauthorized delete and deploy actions |
-| 🐛 Fixed | Bulk delete approval bypass for 1–2 applications |
-| 🐛 Fixed | UnauthorizedAccessException crash on profile selection change |
-| 🐛 Fixed | Window startup size (now opens maximized instead of 960×1260 windowed) |
+| ✨ New | AI packaging assistant (BYOK: Anthropic / OpenAI-compatible / local Ollama) for name, description, silent switches, and kill switch |
+| ✨ New | "Apply Suggestions" writes AI output directly into the Package App form fields |
+| ✨ New | Silent kill switch — force-closes running processes before a required/silent install |
+| ✨ New | All-users desktop shortcut created by the MSI installer |
+| 🛠 Improved | MSI build script reads the target framework from the project (no hardcoded path) |
+| 🐛 Fixed | Apply Suggestions no longer truncates a path-based uninstall command (`%ProgramFiles%\...\uninstall.exe /S`) |
+| 🐛 Fixed | AI suggestion now reliably returns silent install/uninstall switches and resident processes instead of leaving them blank |
+
+> Earlier releases (Enterprise/Standalone modes, silent MSI installation, approval workflow, stability fixes) remain available — see the [Releases](https://github.com/mazhaistudios/DeployFusion/releases) page for full history.
 
 ---
 
@@ -62,6 +55,7 @@ Tasks that previously required 30–60 minutes of manual console work (creating 
 
 | Feature | Description |
 |---|---|
+| 🤖 **AI Packaging Assistant** | Suggests deployment name, description, silent install/uninstall switches, and the silent kill switch — BYOK with Anthropic, OpenAI-compatible, or local Ollama; one-click apply to the form |
 | 🚀 **One-Click SCCM Deployment** | Creates the app, PSADT wrapper, deployment types, 3 collections, and 3 deployments automatically |
 | 📦 **Intune Win32 Publishing** | Packages `.intunewin`, uploads via MS Graph API, creates Azure AD groups and assignments |
 | 🎨 **Auto Icon Fetching** | Fetches high-quality app icons automatically from the web |
@@ -142,7 +136,7 @@ msiexec /i MazhaiDeployFusion.msi /qn /l*v "%TEMP%\DeployFusion.log"
 
 ### 🤫 Silent Installation Support
 
-DeployFusion v3.0.1 supports fully unattended installations for automated deployment scenarios.
+DeployFusion v4.0.1 supports fully unattended installations for automated deployment scenarios.
 
 **MSI public properties:**
 
@@ -179,7 +173,7 @@ Before installing or building DeployFusion, ensure the following are in place:
 | Requirement | Details |
 |---|---|
 | **Windows 10/11 or Windows Server 2019+** | x64 only |
-| **.NET 8.0 Desktop Runtime** | [Download here](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) |
+| **.NET 10.0 Desktop Runtime** | [Download here](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) |
 | **SCCM Admin Console** | Must be installed. The tool auto-detects it at `E:\SCCM\AdminConsole\bin`, `C:\Program Files (x86)\Microsoft Configuration Manager\AdminConsole\bin`, or `C:\Program Files (x86)\Microsoft Endpoint Manager\AdminConsole\bin` |
 | **Network access to SCCM Site Server** | TCP port 135 (RPC) must be open |
 | **SCCM Administrator rights** | The account running the tool needs Full Administrator role in SCCM |
@@ -206,7 +200,7 @@ Before installing or building DeployFusion, ensure the following are in place:
 
 ### Option 1: Install from MSI (Recommended)
 
-1. Download the latest `MazhaiDeployFusion-3.0.1.msi` from the [Releases](https://github.com/mazhaistudios/DeployFusion/releases) page.
+1. Download the latest `MazhaiDeployFusion-4.0.1.msi` from the [Releases](https://github.com/mazhaistudios/DeployFusion/releases) page.
 2. Run the installer. It will install to `C:\Program Files\Mazhai DeployFusion\` by default.
 3. Launch **Mazhai DeployFusion** from the Start Menu.
 
@@ -226,7 +220,7 @@ dotnet restore DeployFusion.csproj
 dotnet build DeployFusion.csproj --configuration Release
 
 # 4. Run
-.\bin\Release\net8.0-windows\DeployFusion.exe
+.\bin\Release\net10.0-windows\DeployFusion.exe
 ```
 
 > **Note:** Building requires the SCCM Admin Console to be installed on the build machine, as the SCCM SDK DLLs are referenced from the console's `bin` folder.
@@ -234,7 +228,7 @@ dotnet build DeployFusion.csproj --configuration Release
 ### Option 3: Build the MSI Installer
 
 ```powershell
-# Requires .NET 8 SDK
+# Requires .NET 10 SDK
 .\Build-Msi.ps1
 
 # With code signing
@@ -574,7 +568,7 @@ The data grid shows per-collection compliance percentages with an inline progres
 
 | Layer | Technology |
 |---|---|
-| UI Framework | WPF (.NET 8.0-windows) |
+| UI Framework | WPF (.NET 10.0-windows) |
 | SCCM Connectivity | WMI / WqlConnectionManager (native SCCM SDK) |
 | SCCM Application Model | `Microsoft.ConfigurationManagement.ApplicationManagement` SDK |
 | Intune API | Microsoft Graph REST API (`/beta/deviceAppManagement`) |
@@ -634,7 +628,7 @@ Contributions are welcome! Please follow these steps:
 ### Building Requirements for Contributors
 
 - Visual Studio 2022 or JetBrains Rider
-- .NET 8 SDK
+- .NET 10 SDK
 - SCCM Admin Console installed locally (for SDK DLL resolution)
 
 ### Project Structure
@@ -703,7 +697,7 @@ Ensure the installer file path does not contain special characters. The file is 
 
 ### Settings not saved after restart
 
-If `C:\ProgramData\MazhaiCloud\DeployFusion` has a restrictive ACL (e.g., created by SYSTEM during a previous install), the app logs a warning but continues operating with in-memory settings. **Re-run the v3.0.1 MSI installer** — it sets `BUILTIN\Users` read/write on the directory, permanently fixing the permissions.
+If `C:\ProgramData\MazhaiCloud\DeployFusion` has a restrictive ACL (e.g., created by SYSTEM during a previous install), the app logs a warning but continues operating with in-memory settings. **Re-run the v4.0.1 MSI installer** — it sets `BUILTIN\Users` read/write on the directory, permanently fixing the permissions.
 
 ---
 
